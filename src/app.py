@@ -365,6 +365,42 @@ def query():
 
 
 @app.route('/healthz')
+def healthz():
+    """Health check completo: verifica Flask e conexão com OpenAI."""
+    from openai import OpenAI
+    import os
+    try:
+        # Teste simples: tentar gerar embedding de um texto curto
+        api_key = os.getenv('OPENAI_API_KEY')
+        if not api_key:
+            return jsonify({
+                'status': 'error',
+                'message': 'OPENAI_API_KEY não configurada'
+            }), 500
+        client = OpenAI(api_key=api_key)
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input="health check"
+        )
+        if response and hasattr(response, 'data'):
+            return jsonify({
+                'status': 'ok',
+                'message': 'Sistema RAG rodando e conectado à OpenAI',
+                'provider': 'openai',
+                'embedding_test': True
+            }), 200
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Falha ao conectar com OpenAI (sem resposta)'
+            }), 500
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Erro ao conectar com OpenAI: {str(e)}'
+        }), 500
+
+
 @app.route('/health')
 def health_check():
     """Endpoint para verificação de saúde do serviço."""
