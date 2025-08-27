@@ -131,8 +131,19 @@ class RAGSystem:
     def __init__(self, config_path: str = None, env_path: str = None):
         """Inicializa o sistema RAG."""
         self.project_root = Path(__file__).parent.parent
-        self.config_path = config_path or self.project_root / "config.yaml"
+        
+        # Detectar ambiente e escolher configuração apropriada
+        if config_path is None:
+            config_file = os.environ.get('RAG_CONFIG_FILE', 'config.yaml')
+            if os.environ.get('RENDER') and os.path.exists(self.project_root / 'config_production.yaml'):
+                config_file = 'config_production.yaml'
+            self.config_path = self.project_root / config_file
+        else:
+            self.config_path = config_path
+            
         self.env_path = env_path or self.project_root / ".env"
+        
+        logger.info(f"📁 Usando configuração: {self.config_path}")
         
         self._load_config()
         self._setup_ai_provider()
