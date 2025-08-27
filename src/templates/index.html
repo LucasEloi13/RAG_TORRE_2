@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG - Torre de Investimentos 2025</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Feather Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <style>
+        :root {
+            --equatorial-blue: #002D72;
+            --equatorial-yellow: #FFC700;
+            --background-light: #F9FAFB;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+            --border-color: #E5E7EB;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-light);
+        }
+        /* Estilo customizado para a barra de rolagem */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        
+        /* Animação de fade-in para as respostas */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="text-text-dark">
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- Barra Lateral -->
+        <aside class="w-64 flex-shrink-0 bg-white border-r border-[var(--border-color)] p-6 hidden md:flex flex-col">
+            <div class="flex justify-center mb-8">
+                <img src="/imgs/Equatorial-logo.svg" alt="Logo Equatorial" class="h-12 w-auto">
+            </div>
+            
+            <div id="system-info" class="space-y-4 text-sm">
+                <h3 class="font-semibold text-gray-800 border-b pb-2 mb-2">Informações do Sistema</h3>
+                <div class="flex justify-between items-center">
+                    <span class="text-[var(--text-light)]">Status:</span>
+                    <span id="status-badge" class="font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs">Carregando...</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-[var(--text-light)]">Provedor:</span>
+                    <span id="info-provider" class="font-semibold">-</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-[var(--text-light)]">Modelo Chat:</span>
+                    <span id="info-chat-model" class="font-semibold text-right">-</span>
+                </div>
+            </div>
+
+            <div class="mt-auto">
+                <h3 class="font-semibold text-gray-800 border-b pb-2 mb-4 text-sm">Dicas de Uso</h3>
+                <ul class="text-xs text-[var(--text-light)] list-disc list-inside space-y-2">
+                    <li>Faça perguntas específicas.</li>
+                    <li>Use termos como AFFA, PM, IQO.</li>
+                    <li>Pergunte sobre fórmulas e cálculos.</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Cabeçalho -->
+            <header class="bg-white border-b border-[var(--border-color)] p-4 shadow-sm">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-xl font-bold text-gray-800">Torre de Investimentos Elegível 2025</h1>
+                </div>
+            </header>
+
+            <!-- Área de Chat e Respostas -->
+            <main class="flex-1 overflow-y-auto p-6 md:p-8">
+                <div class="max-w-4xl mx-auto">
+                    
+                    <!-- Formulário de Pergunta -->
+                    <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                        <form id="rag-form">
+                            <label for="question-input" class="block text-md font-semibold mb-2">Faça sua pergunta:</label>
+                            <textarea 
+                                id="question-input"
+                                rows="3"
+                                class="w-full p-3 border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--equatorial-yellow)] transition-shadow"
+                                placeholder="Ex: Como é calculado o AFFA? Quais são os indicadores da Torre Elegível em 2025?"
+                            ></textarea>
+                            <div class="flex justify-end items-center mt-4">
+                                <button id="submit-button" type="submit" class="bg-[var(--equatorial-blue)] text-white font-bold py-2 px-6 rounded-lg hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--equatorial-blue)] transition-transform duration-150 transform active:scale-95 flex items-center space-x-2">
+                                    <i data-feather="search" class="w-4 h-4"></i>
+                                    <span>Consultar</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Área de Resposta (inicialmente oculta) -->
+                    <div id="response-area" class="hidden space-y-8">
+                        <!-- Resposta Gerada -->
+                        <div class="bg-white p-6 rounded-xl shadow-md fade-in">
+                            <h2 class="text-lg font-semibold mb-4 flex items-center"><i data-feather="message-circle" class="w-5 h-5 mr-2 text-[var(--equatorial-blue)]"></i>Resposta</h2>
+                            <div id="answer-content" class="prose max-w-none text-gray-700">
+                                <!-- O conteúdo da resposta será inserido aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Perguntas Sugeridas -->
+                    <div id="suggested-questions" class="mt-8">
+                        <h3 class="font-semibold mb-4">Perguntas Sugeridas</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <!-- Perguntas serão inseridas aqui -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace(); // Ativa os ícones
+
+            // --- ELEMENTOS DO DOM ---
+            const ragForm = document.getElementById('rag-form');
+            const questionInput = document.getElementById('question-input');
+            const submitButton = document.getElementById('submit-button');
+            const responseArea = document.getElementById('response-area');
+            const answerContent = document.getElementById('answer-content');
+            const suggestedContainer = document.querySelector('#suggested-questions .grid');
+
+            // Elementos da sidebar
+            const statusBadge = document.getElementById('status-badge');
+            const infoProvider = document.getElementById('info-provider');
+            const infoChatModel = document.getElementById('info-chat-model');
+
+            // --- CARREGAR INFORMAÇÕES DO SISTEMA ---
+            loadSystemInfo();
+
+            // --- PERGUNTAS SUGERIDAS ---
+            const sampleQuestions = [
+                "O que é AFFA e como é calculado?",
+                "Quais são os três indicadores da Torre Elegível em 2025?",
+                "Como funciona o Prazo Médio (PM)?",
+                "O que é IQO - Índice de Qualidade de Obras?",
+                "Como calcular o VR_Distribuidora?",
+                "Quais as mudanças em relação a 2024?",
+            ];
+
+            sampleQuestions.forEach(q => {
+                const button = document.createElement('button');
+                button.className = 'text-left p-3 bg-white rounded-lg border hover:bg-gray-50 transition-colors duration-150 shadow-sm';
+                button.textContent = q;
+                button.onclick = () => {
+                    questionInput.value = q;
+                    ragForm.dispatchEvent(new Event('submit'));
+                };
+                suggestedContainer.appendChild(button);
+            });
+
+            // --- MANIPULADORES DE EVENTOS ---
+            ragForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const question = questionInput.value.trim();
+
+                if (!question) {
+                    alert('Por favor, digite uma pergunta.');
+                    return;
+                }
+
+                // Inicia o estado de carregamento
+                setLoadingState(true);
+                responseArea.classList.add('hidden');
+                
+                try {
+                    const response = await fetch('/api/query', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            question: question,
+                            max_results: 5,
+                            max_context_tokens: 2000
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.error) {
+                        throw new Error(result.error);
+                    }
+
+                    renderResponse(result);
+                } catch (error) {
+                    console.error('Erro ao processar pergunta:', error);
+                    alert(`Erro ao processar pergunta: ${error.message}`);
+                } finally {
+                    setLoadingState(false);
+                }
+            });
+
+            // --- FUNÇÕES AUXILIARES ---
+            async function loadSystemInfo() {
+                try {
+                    const response = await fetch('/api/system-info');
+                    if (response.ok) {
+                        const info = await response.json();
+                        
+                        statusBadge.textContent = 'Ativo';
+                        statusBadge.className = 'font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full text-xs';
+                        
+                        infoProvider.textContent = info.provider ? info.provider.charAt(0).toUpperCase() + info.provider.slice(1) : 'N/A';
+                        infoChatModel.textContent = info.chat_model || 'N/A';
+                        
+                    } else {
+                        statusBadge.textContent = 'Erro';
+                        statusBadge.className = 'font-semibold text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs';
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar informações do sistema:', error);
+                    statusBadge.textContent = 'Erro';
+                    statusBadge.className = 'font-semibold text-red-600 bg-red-100 px-2 py-1 rounded-full text-xs';
+                }
+            }
+
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    submitButton.disabled = true;
+                    submitButton.innerHTML = `
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processando...`;
+                } else {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = `
+                        <i data-feather="search" class="w-4 h-4"></i>
+                        <span>Consultar</span>`;
+                    feather.replace();
+                }
+            }
+
+            function renderResponse(result) {
+                // Formatar a resposta para melhor legibilidade
+                let formattedAnswer = result.answer;
+                
+                // Adicionar quebras de linha para listas
+                formattedAnswer = formattedAnswer.replace(/\n-/g, '<br>•');
+                formattedAnswer = formattedAnswer.replace(/\n\d+\./g, match => '<br>' + match.trim());
+                
+                // Formatação para títulos
+                formattedAnswer = formattedAnswer.replace(/### (.*?)(?=\n|$)/g, '<h3 class="text-lg font-semibold mt-4 mb-2 text-[var(--equatorial-blue)]">$1</h3>');
+                formattedAnswer = formattedAnswer.replace(/## (.*?)(?=\n|$)/g, '<h2 class="text-xl font-semibold mt-6 mb-3 text-[var(--equatorial-blue)]">$1</h2>');
+                
+                // Formatação para texto em negrito
+                formattedAnswer = formattedAnswer.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+                
+                // Formatação para blocos de código
+                formattedAnswer = formattedAnswer.replace(/```([^`]+)```/g, '<div class="bg-gray-100 border-l-4 border-[var(--equatorial-blue)] p-4 my-4 font-mono text-sm rounded-r-md">$1</div>');
+                formattedAnswer = formattedAnswer.replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-2 py-1 rounded text-sm font-mono">$1</code>');
+                
+                // Quebras de linha duplas para parágrafos
+                formattedAnswer = formattedAnswer.replace(/\n\n/g, '</p><p class="mb-4">');
+                formattedAnswer = '<p class="mb-4">' + formattedAnswer + '</p>';
+                
+                // Quebras de linha simples
+                formattedAnswer = formattedAnswer.replace(/\n/g, '<br>');
+                
+                answerContent.innerHTML = formattedAnswer;
+
+                feather.replace(); // Re-renderiza os ícones
+                responseArea.classList.remove('hidden');
+                responseArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# RAG Document Analysis System Configuration
+
+# Provedor de IA ativo (openai, deepseek)
+active_provider: "openai"
+
+ai_providers:
+  openai:
+    api_key_env: "OPENAI_API_KEY"
+    base_url: "https://api.openai.com/v1"
+    models:
+      chat: "gpt-4o-mini"
+      embedding: "text-embedding-3-small"
+    max_tokens: 4096
+    temperature: 0.5
+  
+  deepseek:
+    api_key_env: "DEEPSEEK_API_KEY"
+    base_url: "https://api.deepseek.com/v1"
+    models:
+      chat: "deepseek-chat"
+    max_tokens: 4096
+    temperature: 0.5
+
+prompt_config:
+  persona: |
+    Você é um assistente especializado em Torre de Investimentos da Equatorial Energia. Responda de forma BEM EXPLICATIVA, COMO SE TIVESSE EXPLICANDO PARA UMA PESSOA QUE NÃO TEM CONHECIMENTO DO ASSUNTO usando o contexto fornecido.
+  contexto: |
+   {contexto}
+  pergunta: |
+    {pergunta}
+  instructions: |
+    - Utilize o contexto fornecido para responder à pergunta de forma clara e detalhada.
+    - Sempre que for usar uma sigla, explique o que ela significa na primeira vez que aparecer.
+    - Use exemplos práticos e números quando possível
+    - Se for fórmula, mostre a fórmula principal e explique cada conceito
+    - Se houver termos técnicos, defina-os claramente
+    - Seja direto ao ponto, sem introduções muito longas
+    - Use formatação em markdown para melhor legibilidade (negrito, listas, blocos de código)
+    - Organize a resposta com títulos e subtítulos quando apropriado
+    - NÃO inclua seção de "Fontes Consultadas" ou "Referências" na resposta
