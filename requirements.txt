@@ -1,0 +1,27 @@
+# Flask e extensões
+flask==3.1.2
+flask-cors==6.0.1
+
+# Servidor de produção (Waitress, compatível com Windows e Render)
+waitress==3.0.2
+
+# OpenAI API
+openai==1.55.1
+
+# ChromaDB (banco vetorial)
+chromadb==0.5.23
+
+# Tokenização para LLMs
+tiktoken==0.8.0
+
+# Configuração e variáveis de ambiente
+pyyaml==6.0.2
+python-dotenv==1.0.1
+
+# HTTP requests
+httpx==0.28.1
+requests==2.32.3
+
+# Dependências do ChromaDB
+numpy>=1.21.0
+typing-extensions>=4.5.0
