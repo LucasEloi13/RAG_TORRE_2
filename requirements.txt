@@ -24,4 +24,27 @@ requests==2.32.3
 
 # Dependências do ChromaDB
 numpy>=1.21.0
+typing-extensions>=4.5.0# Dependências para a aplicação RAG
+# Gerado automaticamente - Torre de Investimentos 2025
+
+# Core Flask
+flask==3.1.2
+flask-cors==6.0.1
+waitress==3.0.2
+
+# AI e Machine Learning
+openai==1.55.1
+chromadb==0.5.23
+tiktoken==0.8.0
+
+# Processamento de dados
+pyyaml==6.0.2
+python-dotenv==1.0.1
+
+# Utilitários
+httpx==0.28.1
+requests==2.32.3
+
+# Dependências do ChromaDB
+numpy>=1.21.0
 typing-extensions>=4.5.0
