@@ -19,7 +19,7 @@ from streamlit_app import RAGSystem
 
 def main():
     """Demonstração do sistema RAG via CLI."""
-    print("🏗️ Sistema RAG - Torre de Investimentos 2025")
+    print("Sistema RAG - Torre de Investimentos 2025")
     print("=" * 50)
     
     try:

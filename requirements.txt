@@ -1,51 +1,25 @@
 # Flask e extensões
-flask==3.1.2
-flask-cors==6.0.1
-
+flask
+flask-cors
 # Servidor de produção (Waitress, compatível com Windows e Render)
-waitress==3.0.2
-
+waitress
 # OpenAI API
-openai==1.55.1
+openai
 
 # ChromaDB (banco vetorial)
-chromadb==0.5.23
+chromadb
 
 # Tokenização para LLMs
-tiktoken==0.8.0
+tiktoken
 
 # Configuração e variáveis de ambiente
-pyyaml==6.0.2
-python-dotenv==1.0.1
+pyyaml
+python-dotenv
 
 # HTTP requests
-httpx==0.28.1
-requests==2.32.3
+httpx
+requests
 
 # Dependências do ChromaDB
-numpy>=1.21.0
-typing-extensions>=4.5.0
-# Dependências para a aplicação RAG
-# Gerado automaticamente - Torre de Investimentos 2025
-
-# Core Flask
-flask==3.1.2
-flask-cors==6.0.1
-waitress==3.0.2
-
-# AI e Machine Learning
-openai==1.55.1
-chromadb==0.5.23
-tiktoken==0.8.0
-
-# Processamento de dados
-pyyaml==6.0.2
-python-dotenv==1.0.1
-
-# Utilitários
-httpx==0.28.1
-requests==2.32.3
-
-# Dependências do ChromaDB
-numpy>=1.21.0
-typing-extensions>=4.5.0
+numpy
+typing-extensions

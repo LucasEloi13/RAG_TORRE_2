@@ -55,17 +55,10 @@ class OpenAIProvider(AIProvider):
     
     def _setup_client(self):
         """Configura o cliente da OpenAI."""
-        # Configuração básica do cliente OpenAI sem parâmetros extras
-        client_kwargs = {
-            'api_key': self.api_key
-        }
-        
-        # Adicionar base_url apenas se especificado e diferente do padrão
-        base_url = self.config.get('base_url')
-        if base_url and base_url != 'https://api.openai.com/v1':
-            client_kwargs['base_url'] = base_url
-            
-        self.client = OpenAI(**client_kwargs)
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=self.config.get('base_url', 'https://api.openai.com/v1')
+        )
     
     def generate_embedding(self, text: str) -> List[float]:
         """Gera embedding usando OpenAI."""
@@ -99,17 +92,10 @@ class DeepSeekProvider(AIProvider):
     
     def _setup_client(self):
         """Configura o cliente da DeepSeek."""
-        # Configuração básica do cliente para DeepSeek
-        client_kwargs = {
-            'api_key': self.api_key
-        }
-        
-        # Adicionar base_url apenas se especificado
-        base_url = self.config.get('base_url')
-        if base_url:
-            client_kwargs['base_url'] = base_url
-            
-        self.client = OpenAI(**client_kwargs)
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url=self.config.get('base_url', 'https://api.deepseek.com/v1')
+        )
     
     def generate_embedding(self, text: str) -> List[float]:
         """DeepSeek não tem embedding próprio, usa OpenAI como fallback."""
@@ -117,7 +103,6 @@ class DeepSeekProvider(AIProvider):
         if not openai_key:
             raise ValueError("API key da OpenAI necessária para embeddings")
         
-        # Configuração defensiva do cliente OpenAI para embeddings
         openai_client = OpenAI(api_key=openai_key)
         response = openai_client.embeddings.create(
             model="text-embedding-3-small",
@@ -315,26 +300,13 @@ class RAGSystem:
             return {}
 
 
-# Variável global para o sistema RAG
-rag_system = None
-
-
-def get_rag_system():
-    """Obtém ou inicializa o sistema RAG de forma lazy."""
-    global rag_system
-    if rag_system is None:
-        try:
-            logger.info("Tentando inicializar sistema RAG...")
-            rag_system = RAGSystem()
-            logger.info("Sistema RAG inicializado com sucesso")
-        except Exception as e:
-            logger.error(f"Erro ao inicializar sistema RAG: {e}")
-            import traceback
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            rag_system = None
-    else:
-        logger.info("Sistema RAG já inicializado")
-    return rag_system
+# Inicializar sistema RAG globalmente
+try:
+    rag_system = RAGSystem()
+    logger.info("Sistema RAG inicializado com sucesso")
+except Exception as e:
+    logger.error(f"Erro ao inicializar sistema RAG: {e}")
+    rag_system = None
 
 
 @app.route('/imgs/<path:filename>')
@@ -355,7 +327,6 @@ def index():
 @app.route('/api/system-info')
 def system_info():
     """API para obter informações do sistema."""
-    rag_system = get_rag_system()
     if not rag_system:
         return jsonify({'error': 'Sistema RAG não inicializado'}), 500
     
@@ -370,7 +341,6 @@ def system_info():
 @app.route('/api/query', methods=['POST'])
 def query():
     """API para processar perguntas do usuário."""
-    rag_system = get_rag_system()
     if not rag_system:
         return jsonify({'error': 'Sistema RAG não inicializado'}), 500
     
@@ -397,13 +367,8 @@ def query():
 def health_check():
     """Endpoint para verificação de saúde do serviço."""
     try:
-        logger.info("Health check iniciado")
         # Verificar se o sistema RAG está funcionando
-        rag_system = get_rag_system()
-        logger.info(f"RAG system obtido: {rag_system is not None}")
-        
         if not rag_system:
-            logger.warning("Sistema RAG não está disponível")
             return jsonify({
                 'status': 'unhealthy',
                 'message': 'Sistema RAG não inicializado'
@@ -411,7 +376,6 @@ def health_check():
             
         # Verificar se a coleção está acessível
         collection_count = rag_system.collection.count()
-        logger.info(f"Coleção tem {collection_count} documentos")
         
         return jsonify({
             'status': 'healthy',
@@ -423,8 +387,6 @@ def health_check():
         
     except Exception as e:
         logger.error(f"Erro no health check: {e}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
         return jsonify({
             'status': 'unhealthy',
             'message': f'Erro interno: {str(e)}'
@@ -432,7 +394,4 @@ def health_check():
 
 
 if __name__ == '__main__':
-    # Inicializar o sistema RAG no processo principal
-    logger.info("Inicializando sistema RAG no processo principal...")
-    get_rag_system()
-    app.run(debug=False, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000)
